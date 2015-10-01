@@ -29,7 +29,7 @@ gulp.task('scripts', function() {
   .src(PATHS.scripts.src)
   .pipe(coffee())
   .pipe(header(BANNER, {pkg:pkg}))
-  .pipe(concat(pkg.name+".js"))
+  .pipe(concat(pkg.name+".user.js"))
   .pipe(gulp.dest(PATHS.scripts.dest));
 });
 
