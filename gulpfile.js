@@ -1,3 +1,4 @@
+var pkg = require('./package.json');
 var gulp = require('gulp');
 var coffee = require('gulp-coffee');
 var concat = require('gulp-concat');
@@ -13,23 +14,22 @@ var PATHS = {
 var BANNER = [
   "// ==UserScript==",
   "// @name         ZenHub Toolbox",
-  "// @namespace    me.honghao",
-  "// @version      0.1",
-  "// @description  Tools for ZenHub",
-  "// @author       Hao Hong",
+  "// @namespace    https://agate.github.com",
+  "// @version      <%= pkg.version %>",
+  "// @description  <%= pkg.description %>",
+  "// @author       <%= pkg.author %>",
   "// @match        https://github.com/*",
   "// @grant        none",
   "// ==/UserScript==",
   "\n",
 ].join("\n")
 
-
 gulp.task('scripts', function() {
   return gulp
   .src(PATHS.scripts.src)
   .pipe(coffee())
-  .pipe(header(BANNER))
-  .pipe(concat('all.min.js'))
+  .pipe(header(BANNER, {pkg:pkg}))
+  .pipe(concat(pkg.name+".js"))
   .pipe(gulp.dest(PATHS.scripts.dest));
 });
 

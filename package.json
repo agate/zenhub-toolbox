@@ -2,10 +2,7 @@
   "name": "zenhub-toolbox",
   "version": "1.0.0",
   "description": "Tools for ZenHub",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "homepage": "https://github.com/agate/zenhub-toolbox",
   "author": "agate",
   "license": "ISC",
   "dependencies": {
