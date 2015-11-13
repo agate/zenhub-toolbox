@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ZenHub Toolbox
 // @namespace    https://agate.github.com
-// @version      1.0.0
+// @version      1.1.0
 // @description  Tools for ZenHub
 // @author       agate
 // @match        https://github.com/*
@@ -9,39 +9,57 @@
 // ==/UserScript==
 
 (function() {
-  var $btn, appendItem, dump;
+  var $btn, SELECTORS, appendItem, dump;
+
+  SELECTORS = {
+    pipelines: '.zh-board-pipelines .zh-pipeline',
+    pipeline: {
+      name: '.zh-pipeline-name',
+      count: '.zh-pipeline-count',
+      issues: '.zh-pipeline-issues .zh-pipeline-issue',
+      issue: {
+        id: '.zh-issuecard-number',
+        title: '.zh-issuecard-title',
+        assignee: '.zh-issuecard-avatar-container a',
+        labels: '.zh-issuecard-meta .zh-issue-label'
+      }
+    }
+  };
 
   dump = function() {
     var $pipelines, $zhDump, pipelines, results;
-    $pipelines = $('.zh-board-pipelines');
-    pipelines = $pipelines.find('.zh-pipeline').map(function(idx, ele) {
-      var $pipeline, issues, pipelineCount, pipelineName;
+    $pipelines = $(SELECTORS.pipelines);
+    pipelines = $pipelines.map(function(idx, ele) {
+      var $count, $issues, $name, $pipeline, count, issues, name;
       $pipeline = $(ele);
-      pipelineName = $pipeline.find('.zh-pipeline-name').text().trim();
-      pipelineCount = $pipeline.find('.zh-pipeline-count').text().trim().replace(/[^\d]/g, '');
-      issues = $pipeline.find('.zh-pipeline-issues > .zh-pipeline-issue').map(function(idx, ele) {
-        var $issue, issueAssignee, issueId, issueLabels, issueTitle;
+      $name = $pipeline.find(SELECTORS.pipeline.name);
+      $count = $pipeline.find(SELECTORS.pipeline.count);
+      $issues = $pipeline.find(SELECTORS.pipeline.issues);
+      name = $name.text().trim();
+      count = $count.text().trim().replace(/[^\d]/g, '');
+      issues = $issues.map(function(idx, ele) {
+        var $assignee, $id, $issue, $labels, $title, assignee, id, labels, title;
         $issue = $(ele);
-        issueId = $issue.find('.zh-pipeline-issue-title .zh-pipeline-issue-number').text().replace('#', '').trim();
-        issueTitle = $issue.find('.zh-pipeline-issue-title').contents().filter(function() {
-          return this.nodeType === 3;
-        }).map(function() {
-          return this.nodeValue;
-        }).get().join('').trim();
-        issueAssignee = $issue.find('.zh-pipeline-issue-assignee a').attr('original-title');
-        issueLabels = $issue.find('.zh-issue-meta .zh-issue-label').map(function() {
+        $id = $issue.find(SELECTORS.pipeline.issue.id);
+        $title = $issue.find(SELECTORS.pipeline.issue.title);
+        $assignee = $issue.find(SELECTORS.pipeline.issue.assignee);
+        $labels = $issue.find(SELECTORS.pipeline.issue.labels);
+        id = $id.text().replace('#', '').trim();
+        title = $title.text().trim();
+        assignee = $assignee.attr('aria-label');
+        labels = $labels.map(function() {
           return $(this).data('name');
         }).get();
         return {
-          id: issueId,
-          title: issueTitle,
-          assignee: issueAssignee,
-          labels: issueLabels
+          id: id,
+          title: title,
+          assignee: assignee,
+          labels: labels
         };
       }).get();
       return {
-        name: pipelineName,
-        count: pipelineCount,
+        name: name,
+        count: count,
         issues: issues
       };
     }).get();

@@ -1,34 +1,51 @@
-dump = ->
-  $pipelines = $('.zh-board-pipelines')
-  pipelines = $pipelines.find('.zh-pipeline').map (idx, ele) ->
-    $pipeline = $(ele)
+SELECTORS =
+  pipelines: '.zh-board-pipelines .zh-pipeline'
+  pipeline:
+    name: '.zh-pipeline-name'
+    count: '.zh-pipeline-count'
+    issues: '.zh-pipeline-issues .zh-pipeline-issue'
+    issue:
+      id: '.zh-issuecard-number'
+      title: '.zh-issuecard-title'
+      assignee: '.zh-issuecard-avatar-container a'
+      labels: '.zh-issuecard-meta .zh-issue-label'
 
-    pipelineName = $pipeline.find('.zh-pipeline-name').text().trim()
-    pipelineCount = $pipeline.find('.zh-pipeline-count').text().trim().replace(/[^\d]/g, '')
-    issues = $pipeline.find('.zh-pipeline-issues > .zh-pipeline-issue').map (idx, ele) ->
+dump = ->
+  $pipelines = $(SELECTORS.pipelines)
+
+  pipelines = $pipelines.map (idx, ele) ->
+    $pipeline = $(ele)
+    $name = $pipeline.find(SELECTORS.pipeline.name)
+    $count = $pipeline.find(SELECTORS.pipeline.count)
+    $issues = $pipeline.find(SELECTORS.pipeline.issues)
+
+    name = $name.text().trim()
+    count = $count.text().trim().replace(/[^\d]/g, '')
+    issues = $issues.map (idx, ele) ->
       $issue = $(ele)
-      issueId = $issue.find('.zh-pipeline-issue-title .zh-pipeline-issue-number').text().replace('#', '').trim()
-      issueTitle = $issue.find('.zh-pipeline-issue-title').contents().filter ->
-        @nodeType == 3
-      .map ->
-        @nodeValue
-      .get().join('').trim()
-      issueAssignee = $issue.find('.zh-pipeline-issue-assignee a').attr('original-title')
-      issueLabels = $issue.find('.zh-issue-meta .zh-issue-label').map ->
+      $id = $issue.find(SELECTORS.pipeline.issue.id)
+      $title = $issue.find(SELECTORS.pipeline.issue.title)
+      $assignee = $issue.find(SELECTORS.pipeline.issue.assignee)
+      $labels = $issue.find(SELECTORS.pipeline.issue.labels)
+
+      id = $id.text().replace('#', '').trim()
+      title = $title.text().trim()
+      assignee = $assignee.attr('aria-label')
+      labels = $labels.map ->
         $(@).data('name')
       .get()
 
       {
-        id: issueId
-        title: issueTitle
-        assignee: issueAssignee
-        labels: issueLabels
+        id: id
+        title: title
+        assignee: assignee
+        labels: labels
       }
     .get()
 
     {
-      name: pipelineName
-      count: pipelineCount
+      name: name
+      count: count
       issues: issues
     }
   .get()
