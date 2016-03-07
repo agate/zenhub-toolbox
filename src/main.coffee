@@ -10,7 +10,7 @@ SELECTORS =
       assignee: '.zh-issuecard-avatar-container a'
       labels: '.zh-issuecard-meta .zh-issue-label'
 
-dump = ->
+toHash = ->
   $pipelines = $(SELECTORS.pipelines)
 
   pipelines = $pipelines.map (idx, ele) ->
@@ -53,6 +53,7 @@ dump = ->
   results =
     pipelines: pipelines
 
+showDialog = (body) ->
   $zhDump = $("""
     <div id="zh-dump">
       <style>
@@ -94,26 +95,76 @@ dump = ->
       </div>
     </div>
   """)
-  $zhDump.find('textarea').val(JSON.stringify(results, null, 2))
+  $zhDump.find('textarea').val(body)
   $zhDump.find('a.close').click ->
     $zhDump.remove()
   $zhDump.appendTo($('body'))
 
-appendItem = ->
-  $nav = $('.zh-board-menu .tabnav-right')
+dump = ->
+  body = JSON.stringify(toHash(), null, 2)
+  showDialog(body)
+
+okrs = ->
+  baseUrl = $('.entry-title [itemprop=name] a').prop('href')
+  pipelines = toHash().pipelines
+  issues =
+    yes: []
+    maybe: []
+
+  for pipeline in pipelines
+    if pipeline.name == 'To Do' || pipeline.name == 'Pending'
+      issues.yes = issues.yes.concat(pipeline.issues)
+    else
+      if pipeline.name == 'Maybe'
+        issues.maybe = issues.maybe.concat(pipeline.issues)
+
+  issues.yes.sort (a, b) ->
+    res = parseInt(a.id) - parseInt(b.id)
+    res
+  issues.maybe.sort (a, b) ->
+    res = parseInt(a.id) - parseInt(b.id)
+    res
+
+  body = """
+    * Plan
+        * Front
+            * YES
+    #{issues.yes.map((issue) => "            * #{issue.title} [##{issue.id}](#{baseUrl}/issues/#{issue.id})").join("\n")}
+            * Maybe
+    #{issues.maybe.map((issue) => "            * #{issue.title} [##{issue.id}](#{baseUrl}/issues/#{issue.id})").join("\n")}
+    * Out of Plan
+  """
+
+  showDialog(body)
+
+appendItem = ($btn) ->
+  $nav = $('.zh-board-menu .tabnav-left')
   if $nav.length
     $nav.append($btn)
   else
-    setTimeout(appendItem, 1000)
+    setTimeout ->
+      appendItem($btn)
+    , 1000
 
-$btn = $("""
-  <li class="zh-board-menu-itemgroup">
-    <div class="zh-board-menu-item">
-      <a class="btn btn-sm" style="padding: 3px 10px">
-        Dump
-      </a>
-    </div>
-  </li>
-""").click(dump)
+btns =
+  dump: $("""
+    <li class="zh-board-menu-itemgroup">
+      <div class="zh-board-menu-item">
+        <a class="btn btn-sm" style="padding: 3px 10px">
+          Dump
+        </a>
+      </div>
+    </li>
+  """).click(dump),
+  okrs: $("""
+    <li class="zh-board-menu-itemgroup">
+      <div class="zh-board-menu-item">
+        <a class="btn btn-sm" style="padding: 3px 10px">
+          OKRs
+        </a>
+      </div>
+    </li>
+  """).click(okrs)
 
-appendItem()
+for name, btn of btns
+  appendItem(btn)
