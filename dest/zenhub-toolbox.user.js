@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         ZenHub Toolbox
 // @namespace    https://agate.github.com
-// @version      1.2.0
+// @version      1.2.1
 // @description  Tools for ZenHub
 // @author       agate
 // @match        https://github.com/*
 // @grant        none
+// @require      https://code.jquery.com/jquery-latest.js
 // ==/UserScript==
 
 (function() {

@@ -20,6 +20,7 @@ var BANNER = [
   "// @author       <%= pkg.author %>",
   "// @match        https://github.com/*",
   "// @grant        none",
+  "// @require      https://code.jquery.com/jquery-latest.js",
   "// ==/UserScript==",
   "\n",
 ].join("\n")
